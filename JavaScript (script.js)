@@ -1,0 +1,47 @@
+const taskInput = document.getElementById("taskInput");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const taskList = document.getElementById("taskList");
+
+addTaskBtn.addEventListener("click", addTask);
+window.addEventListener("DOMContentLoaded", getTasks);
+
+function addTask() {
+    const taskText = taskInput.value.trim();
+    if (taskText !== "") {
+        fetch('/add_task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ task: taskText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            getTasks();
+        })
+        .catch(error => {
+            console.error(error);
+        });
+        taskInput.value = "";
+    }
+}
+
+function getTasks() {
+    fetch('/get_tasks')
+        .then(response => response.json())
+        .then(data => {
+            taskList.innerHTML = "";
+            data.forEach(task => {
+                const taskItem = document.createElement("li");
+                taskItem.innerHTML = `
+                    <span>${task}</span>
+                    <button class="delete-btn">Delete</button>
+                `;
+                taskList.appendChild(taskItem);
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
